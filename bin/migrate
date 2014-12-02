@@ -1,0 +1,77 @@
+#!/usr/bin/env php
+#
+# author: Alberto Maturano <alberto@maturano.mx>
+#
+
+<?php
+
+require 'bootstrap.php';
+require 'src/Member.php';
+
+
+// Datos de conexión como parámetros del script
+$dbParams = [
+    'host'     => 'localhost',
+    'database' => $argv[1],
+    'username' => $argv[2],
+    'password' => $argv[3],
+];
+
+
+$sqlMembers = <<<SQL
+SELECT
+    member_id,
+    user_first_name,
+    user_last_name,
+    -- Normalizando fechas '0000-00-00' a NULL
+    NULLIF (user_birthdate, '0000-00-00') AS user_birthdate,
+    user_email1,
+    user_admission
+
+FROM
+    users
+
+WHERE
+    user_admission IS NOT NULL
+
+ORDER BY member_id
+SQL;
+
+
+try {
+    $conn = new \PDO(
+        "mysql:dbname={$dbParams['database']};host={$dbParams['host']}",
+        $dbParams['username'],
+        $dbParams['password']
+    );
+
+} catch (\PDOException $e) {
+    // TODO
+    echo 'Connection Failed: ' . $e->getMessage() . PHP_EOL;
+    exit(1);
+}
+
+$sth = $conn->prepare($sqlMembers);
+$sth->execute();
+$results = $sth->fetchAll(\PDO::FETCH_ASSOC);
+
+
+echo 'Miembros a importar: ' . count($results) . PHP_EOL;
+
+foreach ($results as $row) {
+
+    $member = (new Member())
+        ->setId($row['member_id'])
+        ->setFirstName($row['user_first_name'])
+        ->setLastName($row['user_last_name'])
+        ->setBirthdate($row['user_birthdate'])
+        ->setEmail($row['user_email1'])
+        ->setAdmissionType($row['user_admission'])
+    ;
+
+    $em->persist($member);
+}
+
+$em->flush();
+
+// vim: ft=php
