@@ -8,7 +8,6 @@ require 'bootstrap.php';
 require 'src/Member.php';
 require 'src/Membership.php';
 
-
 // Datos de conexión como parámetros del script
 $dbParams = [
     'host'     => 'localhost',
@@ -41,7 +40,13 @@ $sqlMemberships = <<<SQL
 SELECT
     member_id,
     membership_start,
-    membership_end
+    membership_end,
+    membership_card_status,
+    -- Si fecha de creación es inválida se recupera la de última modificación
+    TIMESTAMP (COALESCE (
+        NULLIF (membership_timestamp_created, '0000-00-00'),
+        NULLIF (membership_timestamp_updated, '0000-00-00')
+    )) AS membership_timestamp_created
 
 FROM
     memberships
@@ -110,6 +115,8 @@ foreach ($results as $row) {
         ->setMember($memberRepository->find($row['member_id']))
         ->setStart($row['membership_start'])
         ->setEnd($row['membership_end'])
+        ->setDelivery($row['membership_card_status'])
+        ->setCreated($row['membership_timestamp_created'])
     ;
 
     $em->persist($membership);

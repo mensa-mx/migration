@@ -37,6 +37,20 @@ class Membership
     private $end;
 
     /**
+     * @var string
+     *
+     * @Column(name="delivery", type="string", length=20, nullable=true)
+     */
+    private $delivery;
+
+    /**
+     * @var string
+     *
+     * @Column(name="created", type="string", length=20)
+     */
+    private $created;
+
+    /**
      * @var Member
      *
      * @ManyToOne(targetEntity="Member", inversedBy="memberships")
@@ -89,6 +103,52 @@ class Membership
     public function getEnd()
     {
         return $this->end;
+    }
+
+    /**
+     * Set delivery
+     *
+     * @param  string $delivery
+     * @return Membership
+     */
+    public function setDelivery($delivery)
+    {
+        $this->delivery = $delivery;
+
+        return $this;
+    }
+
+    /**
+     * Get delivery
+     *
+     * @return string
+     */
+    public function getDelivery()
+    {
+        return $this->delivery;
+    }
+
+    /**
+     * Set created
+     *
+     * @param  string created
+     * @return Membership
+     */
+    public function setCreated($created)
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    /**
+     * Get created
+     *
+     * @return string
+     */
+    public function getCreated()
+    {
+        return $this->created;
     }
 
     /**
