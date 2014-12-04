@@ -1,13 +1,14 @@
 <?php
-/**
- * @author: Alberto Maturano <alberto@maturano.mx>
- */
+
+namespace Mensa;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
 
 /**
  * Member
+ *
+ * @author: Alberto Maturano <alberto@maturano.mx>
  *
  * @Entity
  * @Table("members")
@@ -63,18 +64,27 @@ class Member
     /**
      * @var Membership
      *
-     * @ORM\OneToMany(targetEntity="Membership", mappedBy="member")
+     * @OneToMany(targetEntity="Membership", mappedBy="member")
      */
     private $memberships;
 
 
+    /**
+     * Constructor
+     */
     public function __construct()
     {
         $this->memberships = new ArrayCollection();
     }
 
     /**
-     * @param int $id
+     * Set id
+     *
+     * @param  int $id
+     * @return Member
+     *
+     * @FIXME Durante el proceso de recuperación se están asignando IDs de manera manual.
+     *  Eliminar cuando ya no sea así.
      */
     public function setId($id)
     {
@@ -84,6 +94,8 @@ class Member
     }
 
     /**
+     * Get Id
+     *
      * @return int
      */
     public function getId()
@@ -92,7 +104,10 @@ class Member
     }
 
     /**
-     * @param string $firstName
+     * Set firstName
+     *
+     * @param  string $firstName
+     * @return Member
      */
     public function setFirstName($firstName)
     {
@@ -102,6 +117,8 @@ class Member
     }
 
     /**
+     * Get firstName
+     *
      * @return string
      */
     public function getFirstName()
@@ -110,7 +127,10 @@ class Member
     }
 
     /**
-     * @param string $lastName
+     * Set lastName
+     *
+     * @param  string $lastName
+     * @return Member
      */
     public function setLastName($lastName)
     {
@@ -120,6 +140,8 @@ class Member
     }
 
     /**
+     * Get lastName
+     *
      * @return string
      */
     public function getLastName()
@@ -128,7 +150,10 @@ class Member
     }
 
     /**
-     * @param string $birthdate
+     * Set birthdate
+     *
+     * @param  string $birthdate
+     * @return Member
      */
     public function setBirthdate($birthdate)
     {
@@ -138,6 +163,8 @@ class Member
     }
 
     /**
+     * Get birthdate
+     *
      * @return string
      */
     public function getBirthdate()
@@ -146,7 +173,10 @@ class Member
     }
 
     /**
-     * @param string $email
+     * Set email
+     *
+     * @param  string $email
+     * @return Member
      */
     public function setEmail($email)
     {
@@ -156,6 +186,8 @@ class Member
     }
 
     /**
+     * Get email
+     *
      * @return string
      */
     public function getEmail()
@@ -164,7 +196,10 @@ class Member
     }
 
     /**
-     * @param string $admissionType
+     * Set admissionType
+     *
+     * @param  string $admissionType
+     * @return Member
      */
     public function setAdmissionType($admissionType)
     {
@@ -174,6 +209,8 @@ class Member
     }
 
     /**
+     * Get admissionType
+     *
      * @return string
      */
     public function getAdmissionType()
@@ -182,6 +219,8 @@ class Member
     }
 
     /**
+     * Add memberships
+     *
      * @param  Membership $memberships
      * @return Member
      */
@@ -193,6 +232,8 @@ class Member
     }
 
     /**
+     * Remove memberships
+     *
      * @param Membership $membership
      */
     public function removeMembership(Membership $membership)
@@ -201,6 +242,8 @@ class Member
     }
 
     /**
+     * Get memberships
+     *
      * @return \Doctrine\Common\Collections\Collection
      */
     public function getMemberships()

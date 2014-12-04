@@ -4,9 +4,10 @@
  * @author Alberto Maturano <alberto@maturano.mx>
  */
 
-require 'bootstrap.php';
-require 'src/Member.php';
-require 'src/Membership.php';
+require 'cli-config.php';
+
+use Mensa\Member;
+use Mensa\Membership;
 
 // Datos de conexión como parámetros del script
 $dbParams = [
@@ -69,7 +70,7 @@ try {
     );
 
     // Permite ignorar la secuencia y asignar un ID manualmente
-    $meta = $em->getClassMetaData('Member');
+    $meta = $em->getClassMetaData('Mensa\Member');
     $meta->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
 
 } catch (\PDOException $e) {
@@ -104,15 +105,12 @@ $sth = $conn->prepare($sqlMemberships);
 $sth->execute();
 $results = $sth->fetchAll(\PDO::FETCH_ASSOC);
 
-
 echo 'Membresías a importar: ' . count($results) . PHP_EOL;
-
-$memberRepository = $em->getRepository('Member');
 
 foreach ($results as $row) {
 
     $membership = (new Membership())
-        ->setMember($memberRepository->find($row['member_id']))
+        ->setMember($em->find('Mensa\Member', $row['member_id']))
         ->setStart($row['membership_start'])
         ->setEnd($row['membership_end'])
         ->setDelivery($row['membership_card_status'])
@@ -124,4 +122,4 @@ foreach ($results as $row) {
 
 $em->flush();
 
-// vim: ft=php
+// vim: ft=php :

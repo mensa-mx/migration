@@ -1,5 +1,14 @@
 {
+    "autoload": {
+        "psr-4": {
+            "Mensa\\": "src/"
+        }
+    },
     "require": {
+        "php": ">=5.4",
         "doctrine/orm": "~2.4"
+    },
+    "config": {
+        "bin-dir": "bin/"
     }
 }

@@ -1,11 +1,12 @@
 <?php
-/**
- * @author Alberto Maturano <alberto@maturano.mx>
- */
+
+namespace Mensa;
 
 
 /**
  * Membership
+ *
+ * @author Alberto Maturano <alberto@maturano.mx>
  *
  * @Entity
  * @Table("memberships")
@@ -60,6 +61,8 @@ class Membership
 
 
     /**
+     * Get id
+     *
      * @return int
      */
     public function getId()
@@ -68,6 +71,8 @@ class Membership
     }
 
     /**
+     * Set start date
+     *
      * @param  string $start
      * @return Membership
      */
@@ -79,6 +84,8 @@ class Membership
     }
 
     /**
+     * Get start date
+     *
      * @return string
      */
     public function getStart()
@@ -87,6 +94,8 @@ class Membership
     }
 
     /**
+     * Set end date
+     *
      * @param  string $end
      * @return Membership
      */
@@ -98,6 +107,8 @@ class Membership
     }
 
     /**
+     * Get end date
+     *
      * @return string
      */
     public function getEnd()
@@ -152,6 +163,8 @@ class Membership
     }
 
     /**
+     * Set Member
+     *
      * @param  Member $member
      * @return Membership
      */
@@ -163,6 +176,8 @@ class Membership
     }
 
     /**
+     * Get Member
+     *
      * @return Member
      */
     public function getMember()
