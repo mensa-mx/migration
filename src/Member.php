@@ -3,6 +3,8 @@
  * @author: Alberto Maturano <alberto@maturano.mx>
  */
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 
 /**
  * Member
@@ -58,6 +60,18 @@ class Member
      */
     protected $admissionType;
 
+    /**
+     * @var Membership
+     *
+     * @ORM\OneToMany(targetEntity="Membership", mappedBy="member")
+     */
+    private $memberships;
+
+
+    public function __construct()
+    {
+        $this->memberships = new ArrayCollection();
+    }
 
     /**
      * @param int $id
@@ -165,5 +179,32 @@ class Member
     public function getAdmissionType()
     {
         return $this->admissionType;
+    }
+
+    /**
+     * @param  Membership $memberships
+     * @return Member
+     */
+    public function addMembership(Membership $membership)
+    {
+        $this->memberships[] = $membership;
+
+        return $this;
+    }
+
+    /**
+     * @param Membership $membership
+     */
+    public function removeMembership(Membership $membership)
+    {
+        $this->memberships->removeElement($membership);
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMemberships()
+    {
+        return $this->memberships;
     }
 }
