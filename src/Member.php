@@ -69,11 +69,12 @@ class Member
     protected $admissionType;
 
     /**
-     * @var string
+     * @var Address
      *
-     * @Column(name="created", type="string", length=20)
+     * @OneToOne(targetEntity="Address", inversedBy="member")
+     * @JoinColumn(name="address_id", referencedColumnName="id")
      */
-    protected $created;
+    private $address;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -81,6 +82,13 @@ class Member
      * @OneToMany(targetEntity="Membership", mappedBy="member")
      */
     private $memberships;
+
+    /**
+     * @var string
+     *
+     * @Column(name="created", type="string", length=20)
+     */
+    protected $created;
 
 
     /**
@@ -256,26 +264,26 @@ class Member
     }
 
     /**
-     * Set created
+     * Set address
      *
-     * @param  string $created
+     * @param  Address $address
      * @return Member
      */
-    public function setCreated($created)
+    public function setAddress(Address $address)
     {
-        $this->created = $created;
+        $this->address = $address;
 
         return $this;
     }
 
     /**
-     * Get created
+     * Get address
      *
-     * @return string
+     * @return Address
      */
-    public function getCreated()
+    public function getAddress()
     {
-        return $this->created;
+        return $this->address;
     }
 
     /**
@@ -309,5 +317,28 @@ class Member
     public function getMemberships()
     {
         return $this->memberships;
+    }
+
+    /**
+     * Set created
+     *
+     * @param  string $created
+     * @return Member
+     */
+    public function setCreated($created)
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    /**
+     * Get created
+     *
+     * @return string
+     */
+    public function getCreated()
+    {
+        return $this->created;
     }
 }

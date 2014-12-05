@@ -8,6 +8,7 @@ require 'cli-config.php';
 
 use Mensa\Member;
 use Mensa\Membership;
+use Mensa\Address;
 
 // Datos de conexión como parámetros del script
 $dbParams = [
@@ -20,28 +21,45 @@ $dbParams = [
 
 $sqlMembers = <<<SQL
 SELECT
-    member_id,
-    user_first_name,
-    user_last_name,
+    u.member_id,
+    u.user_first_name,
+    u.user_last_name,
     -- El campo está pero ningún registro tienen información válida
     'MASCULINO' AS user_gender,
     -- Normalizando fechas '0000-00-00' a NULL
-    DATE (NULLIF (user_birthdate, '0000-00-00')) AS user_birthdate,
-    user_email1,
-    user_admission,
+    DATE (NULLIF (u.user_birthdate, '0000-00-00')) AS user_birthdate,
+    u.user_email1,
+    u.user_admission,
+    NULLIF (TRIM(u.user_home_address), '') AS user_home_address,
+    NULLIF (TRIM(u.user_home_extended_address), '') AS user_home_extended_address,
+    u.user_home_postal_code,
+    u.user_home_district,
+    COALESCE (f.shortname,  f.fullname)  AS city,
+    COALESCE (fs.shortname, fs.fullname) AS state,
     -- Si fecha de creación es inválida se recupera la de última modificación
     TIMESTAMP (COALESCE (
-      NULLIF (user_timestamp_created, '0000-00-00'),
-      NULLIF (user_timestamp_updated, '0000-00-00')
+        NULLIF (u.user_timestamp_created, '0000-00-00'),
+        NULLIF (u.user_timestamp_updated, '0000-00-00')
     )) AS user_timestamp_created
 
 FROM
-    users
+    users AS u
+  LEFT JOIN
+    features_names AS f ON f.feature_id = u.feature_id
+  LEFT JOIN
+    features_hierarchy AS fh
+        ON fh.lft <= (SELECT lft FROM features_hierarchy WHERE feature_id = f.feature_id)
+       AND fh.rgt >= (SELECT rgt FROM features_hierarchy WHERE feature_id = f.feature_id)
+       AND fh.parent_id = 172
+  LEFT JOIN
+    features_names AS fs ON fs.feature_id = fh.feature_id
 
 WHERE
-    user_admission IS NOT NULL
+    u.user_admission IS NOT NULL
 
-ORDER BY member_id
+GROUP BY u.member_id
+
+ORDER BY u.member_id
 SQL;
 
 $sqlMemberships = <<<SQL
@@ -65,7 +83,7 @@ WHERE
         NULLIF (membership_end,   '0000-00-00')
     ) IS NOT NULL
 
-ORDER BY member_id
+ORDER BY membership_timestamp_created
 SQL;
 
 
@@ -106,7 +124,20 @@ foreach ($results as $row) {
         ->setCreated($row['user_timestamp_created'])
     ;
 
+    $address = (new Address())
+        ->setMember($member)
+        ->setAddressLine1($row['user_home_address'])
+        ->setAddressLine2($row['user_home_extended_address'])
+        ->setColony($row['user_home_district'])
+        ->setCity($row['city'])
+        ->setState($row['state'])
+        ->setPostalCode($row['user_home_postal_code'])
+    ;
+
+    $member->setAddress($address);
+
     $em->persist($member);
+    $em->persist($address);
 }
 
 
