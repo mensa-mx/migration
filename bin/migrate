@@ -23,10 +23,17 @@ SELECT
     member_id,
     user_first_name,
     user_last_name,
+    -- El campo está pero ningún registro tienen información válida
+    'MASCULINO' AS user_gender,
     -- Normalizando fechas '0000-00-00' a NULL
-    NULLIF (user_birthdate, '0000-00-00') AS user_birthdate,
+    DATE (NULLIF (user_birthdate, '0000-00-00')) AS user_birthdate,
     user_email1,
-    user_admission
+    user_admission,
+    -- Si fecha de creación es inválida se recupera la de última modificación
+    TIMESTAMP (COALESCE (
+      NULLIF (user_timestamp_created, '0000-00-00'),
+      NULLIF (user_timestamp_updated, '0000-00-00')
+    )) AS user_timestamp_created
 
 FROM
     users
@@ -92,9 +99,11 @@ foreach ($results as $row) {
         ->setId($row['member_id'])
         ->setFirstName($row['user_first_name'])
         ->setLastName($row['user_last_name'])
+        ->setGender($row['user_gender'])
         ->setBirthdate($row['user_birthdate'])
         ->setEmail($row['user_email1'])
         ->setAdmissionType($row['user_admission'])
+        ->setCreated($row['user_timestamp_created'])
     ;
 
     $em->persist($member);

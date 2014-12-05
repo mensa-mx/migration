@@ -63,7 +63,7 @@ class Membership
     /**
      * Get id
      *
-     * @return int
+     * @return integer
      */
     public function getId()
     {

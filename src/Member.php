@@ -42,6 +42,13 @@ class Member
     /**
      * @var string
      *
+     * @Column(name="gender", type="string", length=10)
+     */
+    protected $gender;
+
+    /**
+     * @var string
+     *
      * @Column(name="birthdate", type="string", length=20, nullable=true)
      */
     protected $birthdate;
@@ -62,7 +69,14 @@ class Member
     protected $admissionType;
 
     /**
-     * @var Membership
+     * @var string
+     *
+     * @Column(name="created", type="string", length=20)
+     */
+    protected $created;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
      *
      * @OneToMany(targetEntity="Membership", mappedBy="member")
      */
@@ -80,7 +94,7 @@ class Member
     /**
      * Set id
      *
-     * @param  int $id
+     * @param  integer $id
      * @return Member
      *
      * @FIXME Durante el proceso de recuperación se están asignando IDs de manera manual.
@@ -96,7 +110,7 @@ class Member
     /**
      * Get Id
      *
-     * @return int
+     * @return integer
      */
     public function getId()
     {
@@ -147,6 +161,29 @@ class Member
     public function getLastName()
     {
         return $this->lastName;
+    }
+
+    /**
+     * Set gender
+     *
+     * @param  string $gender
+     * @return Member
+     */
+    public function setGender($gender)
+    {
+        $this->gender = $gender;
+
+        return $this;
+    }
+
+    /**
+     * Get gender
+     *
+     * @return string
+     */
+    public function getGender()
+    {
+        return $this->gender;
     }
 
     /**
@@ -216,6 +253,29 @@ class Member
     public function getAdmissionType()
     {
         return $this->admissionType;
+    }
+
+    /**
+     * Set created
+     *
+     * @param  string $created
+     * @return Member
+     */
+    public function setCreated($created)
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    /**
+     * Get created
+     *
+     * @return string
+     */
+    public function getCreated()
+    {
+        return $this->created;
     }
 
     /**
