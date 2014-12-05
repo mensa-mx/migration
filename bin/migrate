@@ -10,14 +10,6 @@ use Mensa\Member;
 use Mensa\Membership;
 use Mensa\Address;
 
-// Datos de conexión como parámetros del script
-$dbParams = [
-    'host'     => 'localhost',
-    'database' => $argv[1],
-    'username' => $argv[2],
-    'password' => $argv[3],
-];
-
 
 $sqlMembers = <<<SQL
 SELECT
@@ -88,15 +80,20 @@ SQL;
 
 
 try {
+    $dns = $params['old_database']['driver']
+        . ':dbname=' . $params['old_database']['dbname']
+        . ';port='   . $params['old_database']['port']
+        . ';host='   . $params['old_database']['host']
+    ;
+
     $conn = new \PDO(
-        "mysql:dbname={$dbParams['database']};host={$dbParams['host']}",
-        $dbParams['username'],
-        $dbParams['password']
+        $dns,
+        $params['old_database']['user'],
+        $params['old_database']['password']
     );
 
     // Permite ignorar la secuencia y asignar un ID manualmente
-    $meta = $em->getClassMetaData('Mensa\Member');
-    $meta->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+    $em->getClassMetaData('Mensa\Member')->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
 
 } catch (\PDOException $e) {
     // TODO

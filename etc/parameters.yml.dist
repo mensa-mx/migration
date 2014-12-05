@@ -1,0 +1,15 @@
+database:
+    driver: pdo_pgsql
+    host: localhost
+    port: 5432
+    dbname: ~
+    user: ~
+    password: ~
+
+old_database:
+    driver: mysql
+    host: localhost
+    port: 3306
+    dbname: ~
+    user: ~
+    password: ~

@@ -4,18 +4,13 @@ require 'vendor/autoload.php';
 
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\Yaml\Yaml;
 
+$params = Yaml::parse(file_get_contents('etc/parameters.yml'));
 
-$dbParams = [
-    'driver'   => 'pdo_pgsql',
-    'host'     => 'localhost',
-    'dbname'   => 'mensa',
-    'user'     => 'username',
-    'password' => 'password',
-];
 
 $em = EntityManager::create(
-    $dbParams,
+    $params['database'],
     Setup::createAnnotationMetadataConfiguration([ __DIR__ . '/src' ], true)
 );
 
