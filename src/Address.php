@@ -13,6 +13,8 @@ namespace Mensa;
  */
 class Address
 {
+    use Setter;
+
     /**
      * @var integer
      *
@@ -192,7 +194,7 @@ class Address
     /**
      * Get state
      *
-     * @return State
+     * @return string
      */
     public function getState()
     {

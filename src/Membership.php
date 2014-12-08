@@ -13,6 +13,8 @@ namespace Mensa;
  */
 class Membership
 {
+    use Setter;
+
     /**
      * @var integer
      *

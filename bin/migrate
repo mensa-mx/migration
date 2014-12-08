@@ -13,26 +13,27 @@ use Mensa\Address;
 
 $sqlMembers = <<<SQL
 SELECT
-    u.member_id,
-    u.user_first_name,
-    u.user_last_name,
+    u.member_id AS id,
+    u.user_first_name AS firstName,
+    u.user_last_name AS lastName,
     -- El campo está pero ningún registro tienen información válida
-    'MASCULINO' AS user_gender,
+    'MASCULINO' AS gender,
     -- Normalizando fechas '0000-00-00' a NULL
-    DATE (NULLIF (u.user_birthdate, '0000-00-00')) AS user_birthdate,
-    u.user_email1,
-    u.user_admission,
-    NULLIF (TRIM(u.user_home_address), '') AS user_home_address,
-    NULLIF (TRIM(u.user_home_extended_address), '') AS user_home_extended_address,
-    u.user_home_postal_code,
-    u.user_home_district,
-    COALESCE (f.shortname,  f.fullname)  AS city,
-    COALESCE (fs.shortname, fs.fullname) AS state,
+    DATE (NULLIF (u.user_birthdate, '0000-00-00')) AS birthdate,
+    u.user_email1 AS email,
+    u.user_admission AS admissionType,
     -- Si fecha de creación es inválida se recupera la de última modificación
     TIMESTAMP (COALESCE (
         NULLIF (u.user_timestamp_created, '0000-00-00'),
         NULLIF (u.user_timestamp_updated, '0000-00-00')
-    )) AS user_timestamp_created
+    )) AS created,
+
+    NULLIF (TRIM(u.user_home_address), '') AS addressLine1,
+    NULLIF (TRIM(u.user_home_extended_address), '') AS addressLine2,
+    u.user_home_postal_code AS postalCode,
+    u.user_home_district AS colony,
+    COALESCE (f.shortname,  f.fullname)  AS city,
+    COALESCE (fs.shortname, fs.fullname) AS state
 
 FROM
     users AS u
@@ -57,14 +58,14 @@ SQL;
 $sqlMemberships = <<<SQL
 SELECT
     member_id,
-    membership_start,
-    membership_end,
-    membership_card_status,
+    membership_start AS start,
+    membership_end AS end,
+    membership_card_status AS delivery,
     -- Si fecha de creación es inválida se recupera la de última modificación
     TIMESTAMP (COALESCE (
         NULLIF (membership_timestamp_created, '0000-00-00'),
         NULLIF (membership_timestamp_updated, '0000-00-00')
-    )) AS membership_timestamp_created
+    )) AS created
 
 FROM
     memberships
@@ -111,24 +112,11 @@ echo 'Miembros a importar: ' . count($results) . PHP_EOL;
 foreach ($results as $row) {
 
     $member = (new Member())
-        ->setId($row['member_id'])
-        ->setFirstName($row['user_first_name'])
-        ->setLastName($row['user_last_name'])
-        ->setGender($row['user_gender'])
-        ->setBirthdate($row['user_birthdate'])
-        ->setEmail($row['user_email1'])
-        ->setAdmissionType($row['user_admission'])
-        ->setCreated($row['user_timestamp_created'])
-    ;
+        ->setFromArray($row);
 
     $address = (new Address())
+        ->setFromArray($row)
         ->setMember($member)
-        ->setAddressLine1($row['user_home_address'])
-        ->setAddressLine2($row['user_home_extended_address'])
-        ->setColony($row['user_home_district'])
-        ->setCity($row['city'])
-        ->setState($row['state'])
-        ->setPostalCode($row['user_home_postal_code'])
     ;
 
     $member->setAddress($address);
@@ -147,11 +135,8 @@ echo 'Membresías a importar: ' . count($results) . PHP_EOL;
 foreach ($results as $row) {
 
     $membership = (new Membership())
+        ->setFromArray($row)
         ->setMember($em->find('Mensa\Member', $row['member_id']))
-        ->setStart($row['membership_start'])
-        ->setEnd($row['membership_end'])
-        ->setDelivery($row['membership_card_status'])
-        ->setCreated($row['membership_timestamp_created'])
     ;
 
     $em->persist($membership);

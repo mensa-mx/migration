@@ -15,6 +15,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class Member
 {
+    use Setter;
+
     /**
      * @var integer
      *
@@ -289,7 +291,7 @@ class Member
     /**
      * Add memberships
      *
-     * @param  Membership $memberships
+     * @param  Membership $membership
      * @return Member
      */
     public function addMembership(Membership $membership)
