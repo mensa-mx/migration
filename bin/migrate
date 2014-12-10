@@ -58,8 +58,17 @@ SQL;
 $sqlMemberships = <<<SQL
 SELECT
     member_id,
-    membership_start AS start,
-    membership_end AS end,
+    DATE (COALESCE (
+        NULLIF (membership_start, '0000-00-00'),
+        -- Sin fecha de inicio se analiza la de creación y si coinciden en día y mes a fecha de fin,
+        -- se utiliza; en caso contrario, se asume una membresía de perido de un año.
+        IF (
+            DATE_FORMAT (membership_end, '%d%m') = DATE_FORMAT (membership_timestamp_created, '%d%m'),
+            membership_timestamp_created,
+            DATE_SUB(membership_end, INTERVAL 1 YEAR)
+        )
+    )) AS start,
+    DATE (NULLIF (membership_end, '0000-00-00')) AS end,
     membership_card_status AS delivery,
     -- Si fecha de creación es inválida se recupera la de última modificación
     TIMESTAMP (COALESCE (
@@ -71,12 +80,10 @@ FROM
     memberships
 
 WHERE
-    COALESCE (
-        NULLIF (membership_start, '0000-00-00'),
-        NULLIF (membership_end,   '0000-00-00')
-    ) IS NOT NULL
+    -- Se evitan sobre-análisis cuando no hay la mínima fecha útil
+    NULLIF (membership_end, '0000-00-00') IS NOT NULL
 
-ORDER BY membership_timestamp_created
+ORDER BY membership_timestamp_created, member_id
 SQL;
 
 
