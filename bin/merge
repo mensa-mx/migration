@@ -28,9 +28,11 @@ foreach ($results as $row) {
     $member = $em->find('Mensa\Member', $row[2]);
 
     if ($member) {
+        $isNew = false;
         $regUps++;
 
     } else if ( ! empty($row[6])) {
+        $isNew = true;
         $regNew++;
 
         $member = (new Member())
@@ -52,7 +54,35 @@ foreach ($results as $row) {
         'admissionType' => $row[6],
     ]);
 
+    if ($isNew) {
+        $address = (new Address())->setMember($member);
+
+        $member->setAddress($address);
+
+    } else {
+        $address = $member->getAddress();
+    }
+
+    if (empty($row[12])) {
+        // Pone órden a los datos de calle
+        $row[12] = trim($row[11]);
+        $row[11] = null;
+    }
+
+    // Limpia de cosas raras el dato de código postal
+    $row[16] = str_replace([' ', '"', 'C.P.'], '', $row[16]);
+
+    $address->setFromArray([
+        'addressLine1'  => $row[12],
+        'addressLine2'  => $row[11],
+        'colony'        => $row[13],
+        'city'          => $row[14],
+        'state'         => $row[15],
+        'postalCode'    => $row[16],
+    ]);
+
     $em->persist($member);
+    $em->persist($address);
 }
 
 try {
