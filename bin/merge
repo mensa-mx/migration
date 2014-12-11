@@ -1,0 +1,66 @@
+#!/usr/bin/env php
+<?php
+/**
+ * @author Alberto Maturano <alberto@maturano.mx>
+ */
+
+require 'cli-config.php';
+
+use Mensa\Member;
+use Mensa\Membership;
+use Mensa\Address;
+
+
+$results = array_map('str_getcsv', file($params['provisional_file']));
+
+echo 'Registros a fusionar: ' . (count($results) - 1) . PHP_EOL;
+
+$line = $regNew = $regUps = 0;
+foreach ($results as $row) {
+    $line++;
+    if ($line === 1) { continue; } // Header...
+
+    if (empty($row[2])) {
+        echo '[ERROR] Falta ID para fila: ' . $line . PHP_EOL;
+        continue;
+    }
+
+    $member = $em->find('Mensa\Member', $row[2]);
+
+    if ($member) {
+        $regUps++;
+
+    } else if ( ! empty($row[6])) {
+        $regNew++;
+
+        $member = (new Member())
+            ->setId($row[2])
+            ->setCreated(date('Y-m-d'))
+        ;
+
+    } else {
+        echo '[ERROR] Falta TIPO ADMISION para fila: ' . $line . PHP_EOL;
+        continue;
+    }
+
+    $member->setFromArray([
+        'firstName'     => $row[3],
+        'lastName'      => $row[4],
+        'gender'        => $row[18],
+        'birthdate'     => $row[9],
+        'email'         => $row[8],
+        'admissionType' => $row[6],
+    ]);
+
+    $em->persist($member);
+}
+
+try {
+    $em->flush();
+
+} catch (\PDOException $e) {
+    echo '[ERROR] ' . $e->getMessage() . PHP_EOL;
+    exit(1);
+}
+
+echo 'Registros nuevos: ' . $regNew . PHP_EOL . 'Registros modificados: ' . $regUps . PHP_EOL;

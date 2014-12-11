@@ -100,9 +100,6 @@ try {
         $params['old_database']['password']
     );
 
-    // Permite ignorar la secuencia y asignar un ID manualmente
-    $em->getClassMetaData('Mensa\Member')->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
-
 } catch (\PDOException $e) {
     // TODO
     echo 'Connection Failed: ' . $e->getMessage() . PHP_EOL;

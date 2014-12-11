@@ -2,7 +2,9 @@
 
 
 bin/*
+var/*
 vendor/*
 
-etc/parameters.yml
+!bin/merge
 !bin/migrate
+etc/parameters.yml
