@@ -43,4 +43,9 @@ class UtilClean
 
         return new \DateTime($date);
     }
+
+    static public function deliver($input)
+    {
+        return explode(' ', $input)[0];
+    }
 }

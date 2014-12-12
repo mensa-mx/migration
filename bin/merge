@@ -9,13 +9,15 @@ require 'cli-config.php';
 use Mensa\Member;
 use Mensa\Membership;
 use Mensa\Address;
+use Mensa\UtilClean;
+use Doctrine\Common\Collections\Criteria;
 
 
 $results = array_map('str_getcsv', file($params['provisional_file']));
 
 echo 'Registros a fusionar: ' . (count($results) - 1) . PHP_EOL;
 
-$line = $regNew = $regUps = 0;
+$line = $regNew = $regUps = $mmbsNew = 0;
 foreach ($results as $row) {
     $line++;
     if ($line === 1) { continue; } // Header...
@@ -25,6 +27,8 @@ foreach ($results as $row) {
         continue;
     }
 
+
+    //-- Member --//
     $member = $em->find('Mensa\Member', $row[2]);
 
     if ($member) {
@@ -54,6 +58,8 @@ foreach ($results as $row) {
         'admissionType' => $row[6],
     ]);
 
+
+    //-- Address --//
     if ($isNew) {
         $address = (new Address())->setMember($member);
 
@@ -81,6 +87,45 @@ foreach ($results as $row) {
         'postalCode'    => $row[16],
     ]);
 
+
+    //-- Membership --//
+    if ( ! empty($row[5])) {
+
+        $end = UtilClean::date($row[5]);
+
+        /** @var Mensa\Membership $lastMembership */
+        $lastMembership = $member->getMemberships()->matching(
+            Criteria::create()->orderBy(['end' => Criteria::DESC])->setMaxResults(1)
+        )->first();
+
+        $daysDiff = ($lastMembership)
+            ? (new \DateTime($lastMembership->getEnd()))->diff($end)->format('%r%a')
+            : 31; // Feo, pero funciona. La alternativa es meter más lógica...
+
+        if ($isNew || $daysDiff > 30) {
+            // Cualquier cosa menor a 30 días es considerada la misma membresía o es que la información de la
+            // base de datos está más actualizada.
+            $mmbsNew++;
+
+            $start = ( ! empty($row[19]) )
+                ? UtilClean::date($row[19])
+                : new \DateTime(date('Y') . $end->format('-m-d')); // Se asume la membresía inició "este año"
+
+            $membership = (new Membership())
+                ->setMember($member)
+                ->setFromArray([
+                    'start'     => $start->format('Y-m-d'),
+                    'end'       => $end->format('Y-m-d'),
+                    'delivery'  => UtilClean::deliver($row[0]),
+                    'created'   => date('Y-m-d'),
+                ])
+            ;
+
+            $em->persist($membership);
+        }
+    }
+
+
     $em->persist($member);
     $em->persist($address);
 }
@@ -93,4 +138,8 @@ try {
     exit(1);
 }
 
-echo 'Registros nuevos: ' . $regNew . PHP_EOL . 'Registros modificados: ' . $regUps . PHP_EOL;
+
+echo 'Registros nuevos: ' . $regNew . PHP_EOL
+    . 'Registros modificados: ' . $regUps . PHP_EOL
+    . 'Nuevas membersías: ' . $mmbsNew . PHP_EOL
+    ;

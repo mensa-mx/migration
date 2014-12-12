@@ -28,14 +28,22 @@ class UtilCleanTest extends \PHPUnit_Framework_TestCase
 
     public function testUnusualTextInput()
     {
-        $data = [
+        $dates = [
             '18FEB2021'         => '2021-02-18',
             '16 de ENEro 2024'  => '2024-01-16',
         ];
+        $deliveries = [
+            'Enviada / Cambió de domicilio' => 'Enviada',
+        ];
 
-        foreach ($data as $input => $output) {
+        foreach ($dates as $input => $output) {
             $this->assertEquals($output, UtilClean::date($input)->format('Y-m-d'));
         }
+
+        foreach ($deliveries as $input => $output) {
+            $this->assertEquals($output, UtilClean::deliver($input));
+        }
+
     }
 
     public function testRegularNumberInput()
