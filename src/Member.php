@@ -51,7 +51,7 @@ class Member
     /**
      * @var string
      *
-     * @Column(name="birthdate", type="string", length=20, nullable=true)
+     * @Column(name="birthdate", type="string", length=30, nullable=true)
      */
     protected $birthdate;
 
