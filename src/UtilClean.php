@@ -30,8 +30,8 @@ class UtilClean
             '/nov(iembre)?/i'   => '11',
             '/dic(iembre)?/i'   => '12',
 
-            '/(\d{1,2}) (de )?(\d{2}) (de )?(\d{4})/i'  => '\5-\3-\1',
-            '/(\d{2})\/?(\d{2})\/?(\d{4})/i'            => '\3-\2-\1',
+            '/(\d{1,2}) ?(de )?(\d{2}) ?(de )?(\d{4})/i' => '\5-\3-\1',
+            '/(\d{2})\/?(\d{2})\/?(\d{4})/i' => '\3-\1-\2',
         ];
 
         // Convierte cualquier entrada al formato yyyy-mm-dd

@@ -49,7 +49,9 @@ class UtilCleanTest extends \PHPUnit_Framework_TestCase
     public function testRegularNumberInput()
     {
         $data = [
-            '16/10/2024'    => '2024-10-16',
+            '10/16/2024'    => '2024-10-16',
+            '12/6/2007'     => '2007-12-06',
+            '12/13/2009'    => '2009-12-13',
         ];
 
         foreach ($data as $input => $output) {
