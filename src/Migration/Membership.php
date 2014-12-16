@@ -1,6 +1,6 @@
 <?php
 
-namespace Mensa;
+namespace Mensa\Migration;
 
 
 /**
@@ -9,7 +9,7 @@ namespace Mensa;
  * @author Alberto Maturano <alberto@maturano.mx>
  *
  * @Entity
- * @Table("memberships")
+ * @Table("mig_memberships")
  */
 class Membership
 {
@@ -21,7 +21,7 @@ class Membership
      * @id
      * @Column(type="integer")
      * @GeneratedValue(strategy="SEQUENCE")
-     * @SequenceGenerator(sequenceName="seq_membership_id")
+     * @SequenceGenerator(sequenceName="seq_mig_membership_id")
      */
     private $id;
 

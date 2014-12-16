@@ -3,10 +3,10 @@
  * @author Alberto Maturano <alberto@maturano.mx>
  */
 
-namespace Mensa;
+namespace Mensa\Util;
 
 
-class UtilClean
+class Cleaner
 {
     /**
      * Convierte una fecha en texto a su tipo de dato \DateTime

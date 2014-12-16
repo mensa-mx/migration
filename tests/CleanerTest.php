@@ -3,13 +3,13 @@
  * @author Alberto Maturano <alberto@maturano.mx>
  */
 
-namespace Mensa;
+namespace Mensa\Util;
 
 
 /**
  * Pruebas con datos reales
  */
-class UtilCleanTest extends \PHPUnit_Framework_TestCase
+class CleanerTest extends \PHPUnit_Framework_TestCase
 {
     public function testRegularTextInput()
     {
@@ -22,7 +22,7 @@ class UtilCleanTest extends \PHPUnit_Framework_TestCase
         ];
 
         foreach ($data as $input => $output) {
-            $this->assertEquals($output, UtilClean::date($input)->format('Y-m-d'));
+            $this->assertEquals($output, Cleaner::date($input)->format('Y-m-d'));
         }
     }
 
@@ -37,11 +37,11 @@ class UtilCleanTest extends \PHPUnit_Framework_TestCase
         ];
 
         foreach ($dates as $input => $output) {
-            $this->assertEquals($output, UtilClean::date($input)->format('Y-m-d'));
+            $this->assertEquals($output, Cleaner::date($input)->format('Y-m-d'));
         }
 
         foreach ($deliveries as $input => $output) {
-            $this->assertEquals($output, UtilClean::deliver($input));
+            $this->assertEquals($output, Cleaner::deliver($input));
         }
 
     }
@@ -55,7 +55,7 @@ class UtilCleanTest extends \PHPUnit_Framework_TestCase
         ];
 
         foreach ($data as $input => $output) {
-            $this->assertEquals($output, UtilClean::date($input)->format('Y-m-d'));
+            $this->assertEquals($output, Cleaner::date($input)->format('Y-m-d'));
         }
     }
 }

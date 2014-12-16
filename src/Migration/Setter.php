@@ -1,6 +1,6 @@
 <?php
 
-namespace Mensa;
+namespace Mensa\Migration;
 
 trait Setter
 {

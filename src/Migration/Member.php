@@ -1,6 +1,6 @@
 <?php
 
-namespace Mensa;
+namespace Mensa\Migration;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -11,7 +11,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @author: Alberto Maturano <alberto@maturano.mx>
  *
  * @Entity
- * @Table("members")
+ * @Table("mig_members")
  */
 class Member
 {
@@ -23,7 +23,7 @@ class Member
      * @Id
      * @Column(type="integer")
      * @GeneratedValue(strategy="SEQUENCE")
-     * @SequenceGenerator(sequenceName="seq_member_id")
+     * @SequenceGenerator(sequenceName="seq_mig_member_id")
      */
     protected $id;
 

@@ -6,9 +6,9 @@
 
 require 'cli-config.php';
 
-use Mensa\Member;
-use Mensa\Membership;
-use Mensa\Address;
+use Mensa\Migration\Member;
+use Mensa\Migration\Membership;
+use Mensa\Migration\Address;
 
 
 $sqlMembers = <<<SQL
@@ -140,7 +140,7 @@ foreach ($results as $row) {
 
     $membership = (new Membership())
         ->setFromArray($row)
-        ->setMember($em->find('Mensa\Member', $row['member_id']))
+        ->setMember($em->find('Mensa\Migration\Member', $row['member_id']))
     ;
 
     $em->persist($membership);

@@ -6,10 +6,10 @@
 
 require 'cli-config.php';
 
-use Mensa\Member;
-use Mensa\Membership;
-use Mensa\Address;
-use Mensa\UtilClean;
+use Mensa\Migration\Member;
+use Mensa\Migration\Membership;
+use Mensa\Migration\Address;
+use Mensa\Util\Cleaner;
 use Doctrine\Common\Collections\Criteria;
 
 
@@ -29,7 +29,7 @@ foreach ($results as $row) {
 
 
     //-- Member --//
-    $member = $em->find('Mensa\Member', $row[2]);
+    $member = $em->find('Mensa\Migration\Member', $row[2]);
 
     if ($member) {
         $isNew = false;
@@ -91,7 +91,7 @@ foreach ($results as $row) {
     //-- Membership --//
     if ( ! empty($row[5])) {
 
-        $end = UtilClean::date($row[5]);
+        $end = Cleaner::date($row[5]);
 
         /** @var Mensa\Membership $lastMembership */
         $lastMembership = $member->getMemberships()->matching(
@@ -108,7 +108,7 @@ foreach ($results as $row) {
             $mmbsNew++;
 
             $start = ( ! empty($row[19]) )
-                ? UtilClean::date($row[19])
+                ? Cleaner::date($row[19])
                 : new \DateTime(date('Y') . $end->format('-m-d')); // Se asume la membresía inició "este año"
 
             $membership = (new Membership())
@@ -116,7 +116,7 @@ foreach ($results as $row) {
                 ->setFromArray([
                     'start'     => $start->format('Y-m-d'),
                     'end'       => $end->format('Y-m-d'),
-                    'delivery'  => UtilClean::deliver($row[0]),
+                    'delivery'  => Cleaner::deliver($row[0]),
                     'created'   => date('Y-m-d'),
                 ])
             ;
