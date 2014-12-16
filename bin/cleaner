@@ -9,19 +9,17 @@ require 'cli-config.php';
 use Mensa\Migration;
 use Mensa\Clean;
 use Mensa\Util\Cleaner;
+use Doctrine\Common\Collections\Criteria;
 
 
 $em->getClassMetaData('Mensa\Clean\Member')->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
 
 
+//-- Member --//
 $migMembers = $em->getRepository('\Mensa\Migration\Member')->findAll();
 
-echo 'Por procesar: ' . count($migMembers) . PHP_EOL;
-
+echo 'Miembros por procesar: ' . count($migMembers) . PHP_EOL;
 foreach ($migMembers as $migMember) {
-
-    //-- Member --//
-    echo "\t" . $migMember->getId();
     $member = (new Clean\Member())
         /** @var Migration\Member $migMember */
         ->setId($migMember->getId())
@@ -34,11 +32,17 @@ foreach ($migMembers as $migMember) {
         ->setAdmissionType($migMember->getAdmissionType())
     ;
 
+    $em->persist($member);
+}
 
-    //-- Address --//
-    $migAddress = $migMember->getAddress();
-    echo "\t" . $migAddress->getId();
 
+//-- Address --//
+$migAddresses = $em->getRepository('\Mensa\Migration\Address')->matching(
+    Criteria::create()->orderBy(['id' => Criteria::ASC])
+)->getIterator();
+
+echo 'Direcciones por procesar: ' . count($migAddresses) . PHP_EOL;
+foreach ($migAddresses as $migAddress) {
     $address = (new Clean\Address())
         /** @var Migration\Address $migAddress */
         ->setAddressLine1($migAddress->getAddressLine1())
@@ -47,34 +51,35 @@ foreach ($migMembers as $migMember) {
         ->setColony($migAddress->getColony())
         ->setState($migAddress->getState())
         ->setPostalCode($migAddress->getPostalCode())
-        ->setMember($member)
     ;
 
+    $member = $em->find('Mensa\Clean\Member', $migAddress->getMember()->getId());
+
+    $address->setMember($member);
     $member->setAddress($address);
     $em->persist($address);
     $em->persist($member);
+}
 
 
-    //-- Memberships --//
-    $memberships = $migMember->getMemberships();
-    echo "\t" . count($memberships);
+//-- Memberships --//
+$migMemberships = $em->getRepository('\Mensa\Migration\Membership')->findAll();
 
-    foreach ($memberships as $migMembership) {
-        echo "\t" . $migMembership->getId();
+echo 'Membresías por procesar: ' . count($migMemberships) . PHP_EOL;
+foreach ($migMemberships as $migMembership) {
 
-        $membership = (new Clean\Membership())
-            /** @var Migration\Membership $migMembership */
-            ->setStart(Cleaner::date($migMembership->getStart()))
-            ->setEnd(Cleaner::date($migMembership->getEnd()))
-            ->setDelivery($migMembership->getDelivery())
-            ->setCreated(\DateTime::createFromFormat('Y-m-d H:i:s', $migMembership->getCreated()))
-            ->setMember($member)
-        ;
+    $membership = (new Clean\Membership())
+        /** @var Migration\Membership $migMembership */
+        ->setStart(Cleaner::date($migMembership->getStart()))
+        ->setEnd(Cleaner::date($migMembership->getEnd()))
+        ->setDelivery($migMembership->getDelivery())
+        ->setCreated(\DateTime::createFromFormat('Y-m-d H:i:s', $migMembership->getCreated()))
+    ;
 
-        $em->persist($membership);
-    }
+    $member = $em->find('Mensa\Clean\Member', $migMembership->getMember()->getId());
 
-    echo PHP_EOL;
+    $membership->setMember($member);
+    $em->persist($membership);
 }
 
 $em->flush();
