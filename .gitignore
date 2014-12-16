@@ -7,4 +7,5 @@ vendor/*
 
 !bin/merge
 !bin/migrate
+!bin/cleaner
 etc/parameters.yml
