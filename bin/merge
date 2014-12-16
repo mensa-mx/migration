@@ -41,7 +41,7 @@ foreach ($results as $row) {
 
         $member = (new Member())
             ->setId($row[2])
-            ->setCreated(date('Y-m-d'))
+            ->setCreated(date('Y-m-d H:i:s'))
         ;
 
     } else {
@@ -117,7 +117,7 @@ foreach ($results as $row) {
                     'start'     => $start->format('Y-m-d'),
                     'end'       => $end->format('Y-m-d'),
                     'delivery'  => Cleaner::deliver($row[0]),
-                    'created'   => date('Y-m-d'),
+                    'created'   => date('Y-m-d H:i:s'),
                 ])
             ;
 

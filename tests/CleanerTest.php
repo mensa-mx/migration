@@ -3,7 +3,8 @@
  * @author Alberto Maturano <alberto@maturano.mx>
  */
 
-namespace Mensa\Util;
+namespace Mensa\Migration;
+use Mensa\Util\Cleaner;
 
 
 /**
@@ -56,6 +57,15 @@ class CleanerTest extends \PHPUnit_Framework_TestCase
 
         foreach ($data as $input => $output) {
             $this->assertEquals($output, Cleaner::date($input)->format('Y-m-d'));
+        }
+    }
+
+    public function testEmtpyMustBeNull()
+    {
+        $data = ['', ' ', false, null];
+
+        foreach ($data as $input) {
+            $this->assertNull(Cleaner::date($input));
         }
     }
 }

@@ -16,6 +16,10 @@ class Cleaner
      */
     static public function date($input)
     {
+        if (empty(trim($input))) {
+            return null;
+        }
+
         $replacements = [
             '/ene(ro)?/i'       => '01',
             '/feb(rero)?/i'     => '02',
