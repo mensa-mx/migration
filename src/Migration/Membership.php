@@ -28,14 +28,14 @@ class Membership
     /**
      * @var string
      *
-     * @Column(name="start", type="string", length=20)
+     * @Column(name="start", type="string", length=30)
      */
     private $start;
 
     /**
      * @var string
      *
-     * @Column(name="ends", type="string", length=20)
+     * @Column(name="ends", type="string", length=30)
      */
     private $end;
 

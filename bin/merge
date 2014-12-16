@@ -107,15 +107,15 @@ foreach ($results as $row) {
             // base de datos está más actualizada.
             $mmbsNew++;
 
-            $start = ( ! empty($row[19]) )
-                ? Cleaner::date($row[19])
-                : new \DateTime(date('Y') . $end->format('-m-d')); // Se asume la membresía inició "este año"
+            $start = ( ! empty(trim($row[19])) )
+                ? $row[19]
+                : (new \DateTime('2014' . $end->format('-m-d')))->format('Y-m-d'); // Se asume membresía inició en 2014
 
             $membership = (new Membership())
                 ->setMember($member)
                 ->setFromArray([
-                    'start'     => $start->format('Y-m-d'),
-                    'end'       => $end->format('Y-m-d'),
+                    'start'     => $start,
+                    'end'       => $row[5],
                     'delivery'  => Cleaner::deliver($row[0]),
                     'created'   => date('Y-m-d H:i:s'),
                 ])
