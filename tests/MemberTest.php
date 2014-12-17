@@ -32,7 +32,7 @@ class MemberTest extends \PHPUnit_Framework_TestCase
 
     public function testDetectGender()
     {
-        $males   = ['José', 'Alberto', 'Armando'];
+        $males   = ['José', 'Alberto', 'Armando', 'Eli Alejandro'];
         $females = ['Alejandra', 'Marisol', 'Maria'];
 
         foreach ($males as $input) {

@@ -78,7 +78,11 @@ class Cleaner
      */
     static public function gender($input)
     {
-        $name   = explode(' ', $input)[0];
+        $names = explode(' ', $input);
+        $name  = (strlen($names[0]) < 4 && isset($names[1]))
+               ? $names[1]
+               : $names[0];
+
         $name   = strtr($name, 'áéíóú', 'aeiou'); // Funciona mejor sin acentos
         $gender = trim(shell_exec('python scripts/gender_detector.py ' . ucfirst($name)));
 
