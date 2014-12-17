@@ -56,6 +56,12 @@ class Cleaner
         return explode(' ', $input)[0];
     }
 
+    /**
+     * Valida correo electrónico
+     *
+     * @param  string $input
+     * @return string|null La cadena original o null si no es válido
+     */
     static public function email($input)
     {
         $validator = Validation::createValidator();
