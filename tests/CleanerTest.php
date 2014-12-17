@@ -68,4 +68,31 @@ class CleanerTest extends \PHPUnit_Framework_TestCase
             $this->assertNull(Cleaner::date($input));
         }
     }
+
+    public function testConvertInvalidEmailToNull()
+    {
+        // Casos reales :)
+        $invalidEmails = [
+            'kjdskasdf@kasdfj.dss',
+            'a@b.com',
+            'safsasdf@fasdfsl.com',
+            'lwkejrowerj@fjsodifjl.com',
+            'no@quieresermiemb.ro',
+            'noquieresercontactada@conspamm.com',
+            'noquieresercontactado@telojuro.com',
+        ];
+
+        $validEmails = [
+            'alberto@maturano.mx',
+            'some.user@gmail.com',
+        ];
+
+        foreach ($invalidEmails as $input) {
+            $this->assertNull(Cleaner::email($input));
+        }
+
+        foreach ($validEmails as $input) {
+            $this->assertEquals($input, Cleaner::email($input));
+        }
+    }
 }

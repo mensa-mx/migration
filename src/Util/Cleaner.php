@@ -5,6 +5,9 @@
 
 namespace Mensa\Util;
 
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints\Email;
+
 
 class Cleaner
 {
@@ -51,5 +54,13 @@ class Cleaner
     static public function deliver($input)
     {
         return explode(' ', $input)[0];
+    }
+
+    static public function email($input)
+    {
+        $validator = Validation::createValidator();
+        $violations = $validator->validate($input, new Email([ 'checkMX' => true ]));
+
+        return ($violations->count() === 0) ? $input : null;
     }
 }

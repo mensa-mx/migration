@@ -27,7 +27,7 @@ foreach ($migMembers as $migMember) {
         ->setLastName($migMember->getLastName())
         ->setGender($migMember->getGender())
         ->setBirthdate(Cleaner::date($migMember->getBirthdate()))
-        ->setEmail($migMember->getEmail())
+        ->setEmail(Cleaner::email($migMember->getEmail()))
         ->setCreated(Cleaner::date($migMember->getCreated()))
         ->setAdmissionType($migMember->getAdmissionType())
     ;
