@@ -20,8 +20,13 @@ $migMembers = $em->getRepository('\Mensa\Migration\Member')->findAll();
 
 echo 'Miembros por procesar: ' . count($migMembers) . PHP_EOL;
 foreach ($migMembers as $migMember) {
+
+    /** @var Migration\Member $migMember */
+    if ($migMember->getGender() !== 'FEMENINO') {
+        $migMember->setGender(Cleaner::gender($migMember->getFirstName()));
+    }
+
     $member = (new Clean\Member())
-        /** @var Migration\Member $migMember */
         ->setId($migMember->getId())
         ->setFirstName($migMember->getFirstName())
         ->setLastName($migMember->getLastName())

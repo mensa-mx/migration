@@ -5,6 +5,8 @@
 
 namespace Mensa\Clean;
 
+use Mensa\Util\Cleaner;
+
 
 class MemberTest extends \PHPUnit_Framework_TestCase
 {
@@ -26,5 +28,19 @@ class MemberTest extends \PHPUnit_Framework_TestCase
             ->setCreated($created);
 
         $this->assertEquals($member->getCreated(), $created);
+    }
+
+    public function testDetectGender()
+    {
+        $males   = ['José', 'Alberto', 'Armando'];
+        $females = ['Alejandra', 'Marisol', 'Maria'];
+
+        foreach ($males as $input) {
+            $this->assertEquals('MASCULINO', Cleaner::gender($input));
+        }
+
+        foreach ($females as $input) {
+            $this->assertEquals('FEMENINO', Cleaner::gender($input));
+        }
     }
 }

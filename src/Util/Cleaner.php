@@ -69,4 +69,32 @@ class Cleaner
 
         return ($violations->count() === 0) ? $input : null;
     }
+
+    /**
+     * Identifica el sexo a partir de un nombre
+     *
+     * @param  string $input Nombre de la persona
+     * @return string        MASCULINO|FEMENINO
+     */
+    static public function gender($input)
+    {
+        $name   = explode(' ', $input)[0];
+        $name   = strtr($name, 'áéíóú', 'aeiou'); // Funciona mejor sin acentos
+        $gender = trim(shell_exec('python scripts/gender_detector.py ' . ucfirst($name)));
+
+        switch ($gender) {
+            case 'MALE':
+            case 'MOSTLY_MALE':
+            case 'ANDY': // Desconocido
+                $gender = 'MASCULINO';
+                break;
+
+            case 'FEMALE':
+            case 'MOSTLY_FEMALE':
+                $gender = 'FEMENINO';
+                break;
+        }
+
+        return $gender;
+    }
 }
