@@ -66,6 +66,7 @@ class CleanerTest extends \PHPUnit_Framework_TestCase
 
         foreach ($data as $input) {
             $this->assertNull(Cleaner::date($input));
+            $this->assertNull(Cleaner::text($input));
         }
     }
 

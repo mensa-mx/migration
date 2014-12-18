@@ -12,6 +12,31 @@ use Symfony\Component\Validator\Constraints\Email;
 class Cleaner
 {
     /**
+     * Corrige codificación y espacios en un texto
+     *
+     * @param  string $input
+     * @return string|null
+     */
+    public function text($input)
+    {
+        $equivs = [
+            'Ã¡'    => 'á',
+            'Ã©'    => 'é',
+            'ÃƒÂ©'  => 'é',
+            'Ã'     => 'í',
+            'Ã³'    => 'ó',
+            'Ãº'    => 'ú',
+            'ÃƒÂº'  => 'ú',
+            'Ã±'    => 'ñ',
+            'Ã' => 'A',
+        ];
+
+        $text = trim(strtr($input, $equivs));
+
+        return ($text) ?: null;
+    }
+
+    /**
      * Convierte una fecha en texto a su tipo de dato \DateTime
      *
      * @param  string $input
