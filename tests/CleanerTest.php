@@ -74,6 +74,7 @@ class CleanerTest extends \PHPUnit_Framework_TestCase
     {
         // Casos reales :)
         $invalidEmails = [
+            'sincorreo@gmail.com',
             'kjdskasdf@kasdfj.dss',
             'a@b.com',
             'safsasdf@fasdfsl.com',

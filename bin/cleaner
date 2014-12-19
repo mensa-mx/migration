@@ -24,9 +24,11 @@ foreach ($migMembers as $migMember) {
     /** @var Migration\Member $migMember */
     list($firstName, $lastName) = Cleaner::names($migMember->getFirstName(), $migMember->getLastName());
 
-    $gender = ($migMember->getGender() !== 'FEMENINO')
-            ? Cleaner::gender($firstName)
-            : $migMember->getGender();
+    //$gender = ($migMember->getGender() !== 'FEMENINO')
+    //        ? Cleaner::gender($firstName)
+    //        : $migMember->getGender();
+    // Una vez identificados los casos, se hizo manual el cambio. Ver issue #7
+    $gender = $migMember->getGender();
 
     $member = (new Clean\Member())
         ->setId($migMember->getId())

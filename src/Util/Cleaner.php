@@ -46,10 +46,11 @@ class Cleaner
     static public function names($firstName, $lastName)
     {
         $secondNames = ['Armando', 'Arturo']; // Para no ser interpretados como apellidos
-        $unions = ['de los', 'de', 'y'];
+        $unions = ['de los', 'de la', 'de', 'y'];
 
         // Que legibilidad ni qué mis polainas (╯°□°）╯︵ ┻━┻
         foreach (['firstName', 'lastName'] as $variable) {
+            ${$variable} = ucwords(strtolower(self::text(${$variable})));
 
             ${$variable} = preg_replace_callback(
                 '/\s(' . implode('|', $unions) . ')\s/i',
@@ -57,7 +58,7 @@ class Cleaner
                 {
                     return strtolower($matches[0]);
                 },
-                ucwords(strtolower(self::text(${$variable})))
+                ${$variable}
             );
 
             ${$variable} = preg_replace_callback(
@@ -157,6 +158,12 @@ class Cleaner
      */
     static public function email($input)
     {
+        $notValids = ['sincorreo@gmail.com', 'noquieresercontactado@telojuro.com'];
+
+        if (in_array(trim($input), $notValids)) {
+            return null;
+        }
+
         $validator = Validation::createValidator();
         $violations = $validator->validate($input, new Email([ 'checkMX' => true ]));
 
