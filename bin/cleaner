@@ -22,14 +22,16 @@ echo 'Miembros por procesar: ' . count($migMembers) . PHP_EOL;
 foreach ($migMembers as $migMember) {
 
     /** @var Migration\Member $migMember */
+    list($firstName, $lastName) = Cleaner::names($migMember->getFirstName(), $migMember->getLastName());
+
     $gender = ($migMember->getGender() !== 'FEMENINO')
-            ? Cleaner::gender($migMember->getFirstName())
+            ? Cleaner::gender($firstName)
             : $migMember->getGender();
 
     $member = (new Clean\Member())
         ->setId($migMember->getId())
-        ->setFirstName(Cleaner::text($migMember->getFirstName()))
-        ->setLastName(Cleaner::text($migMember->getLastName()))
+        ->setFirstName($firstName)
+        ->setLastName($lastName)
         ->setGender($gender)
         ->setBirthdate(Cleaner::date($migMember->getBirthdate()))
         ->setEmail(Cleaner::email($migMember->getEmail()))

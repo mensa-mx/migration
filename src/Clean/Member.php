@@ -28,14 +28,14 @@ class Member
     /**
      * @var string
      *
-     * @Column(name="firstName", type="string", length=100)
+     * @Column(name="firstName", type="string", length=50)
      */
     private $firstName;
 
     /**
      * @var string
      *
-     * @Column(name="lastName", type="string", length=100, nullable=true)
+     * @Column(name="lastName", type="string", length=50)
      */
     private $lastName;
 

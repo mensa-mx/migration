@@ -31,9 +31,77 @@ class Cleaner
             'Ã' => 'A',
         ];
 
-        $text = trim(strtr($input, $equivs));
+        $text = preg_replace('/\s\s+/', ' ', trim(strtr($input, $equivs)));
 
         return ($text) ?: null;
+    }
+
+    /**
+     * Normaliza nombres
+     *
+     * @param  string First Name
+     * @param  string Last Name
+     * @return array
+     */
+    static public function names($firstName, $lastName)
+    {
+        $secondNames = ['Armando', 'Arturo']; // Para no ser interpretados como apellidos
+        $unions = ['de los', 'de', 'y'];
+
+        // Que legibilidad ni qué mis polainas (╯°□°）╯︵ ┻━┻
+        foreach (['firstName', 'lastName'] as $variable) {
+
+            ${$variable} = preg_replace_callback(
+                '/\s(' . implode('|', $unions) . ')\s/i',
+                function($matches)
+                {
+                    return strtolower($matches[0]);
+                },
+                ucwords(strtolower(self::text(${$variable})))
+            );
+
+            ${$variable} = preg_replace_callback(
+                '/(Mc|-)(\w)(\w+)/u',
+                function($matches)
+                {
+                    return $matches[1] . ucfirst($matches[2]) . $matches[3];
+                },
+                ${$variable}
+            );
+        }
+
+        if (empty($lastName)) {
+            $names = explode(' ', $firstName);
+
+            switch (count($names)) {
+                case 2:
+                    $firstName = $names[0];
+                    $lastName  = $names[1];
+                    break;
+
+                case 3:
+                    if ( ! in_array($names[1], $secondNames)) {
+                        $firstName = $names[0];
+                        $lastName  = $names[1] . ' ' . $names[2];
+                    } else {
+                        $firstName = $names[0] . ' ' . $names[1];
+                        $lastName  = $names[2];
+                    }
+                    break;
+
+                case 4:
+                    if ( ! in_array(strtolower($names[2]), $unions)) {
+                        $firstName = $names[0] . ' ' . $names[1];
+                        $lastName  = $names[2] . ' ' . $names[3];
+                    } else {
+                        $firstName = $names[0];
+                        $lastName  = $names[1] . ' ' . $names[2] . ' ' . $names[3];
+                    }
+                    break;
+            }
+        }
+
+        return [$firstName, $lastName];
     }
 
     /**
