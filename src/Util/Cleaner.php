@@ -201,4 +201,35 @@ class Cleaner
 
         return $gender;
     }
+
+    /**
+     * Normaliza nombre de estados
+     *
+     * @param  string
+     * @return string|null
+     */
+    static public function state($input)
+    {
+        $state = self::text($input);
+
+        switch ($state) {
+            case 'D.F.':
+                $state = 'Distrito Federal';
+                break;
+
+            case 'Estado de Mexico':
+                $state = 'Estado de México';
+                break;
+
+            case 'Yucatan':
+                $state = 'Yucatán';
+                break;
+
+            case '':
+                $state = null;
+                break;
+        }
+
+        return $state;
+    }
 }

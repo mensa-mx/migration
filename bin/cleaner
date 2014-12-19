@@ -58,7 +58,7 @@ foreach ($migAddresses as $migAddress) {
         ->setAddressLine2(Cleaner::text($migAddress->getAddressLine2()))
         ->setCity(Cleaner::text($migAddress->getCity()))
         ->setColony(Cleaner::text($migAddress->getColony()))
-        ->setState(Cleaner::text($migAddress->getState()))
+        ->setState(Cleaner::state($migAddress->getState()))
         ->setPostalCode($migAddress->getPostalCode())
     ;
 
