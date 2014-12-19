@@ -11,8 +11,9 @@ use Mensa\Clean;
 use Mensa\Util\Cleaner;
 use Doctrine\Common\Collections\Criteria;
 
+$metaMember = $em->getClassMetaData('Mensa\Clean\Member');
 
-$em->getClassMetaData('Mensa\Clean\Member')->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+$metaMember->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
 
 
 //-- Member --//
@@ -92,3 +93,14 @@ foreach ($migMemberships as $migMembership) {
 }
 
 $em->flush();
+
+
+//-- Corrige secuencia --//
+$query = <<<SQL
+SELECT setval(
+    '{$metaMember->sequenceGeneratorDefinition['sequenceName']}',
+    (SELECT MAX(id) FROM {$metaMember->getTableName()})
+)
+SQL;
+
+$em->getConnection()->prepare($query)->execute();
