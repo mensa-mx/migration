@@ -151,6 +151,38 @@ class Cleaner
     }
 
     /**
+     * Normaliza valores de tipo de admisión
+     *
+     * @param  string $input
+     * @return string
+     */
+    static public function admission($input)
+    {
+        $input = trim($input);
+
+        switch ($input) {
+            case 'EXAMEN':
+                $input = 'EXAM';
+                break;
+
+            case 'EXAMEN TONI':
+                $input = 'EXAM_TONI';
+                break;
+
+            case 'TRANSFERENCIA INTERNACIONAL':
+                $input = 'INTERNATIONAL_TRANSFER';
+                break;
+
+            case 'PERFIL PSICOLOGICO':
+                $input = 'PSYCHOLOGICAL_PROFILE';
+                break;
+        }
+
+        return $input;
+    }
+
+
+    /**
      * Valida correo electrónico
      *
      * @param  string $input

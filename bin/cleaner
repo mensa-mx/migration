@@ -39,7 +39,7 @@ foreach ($migMembers as $migMember) {
         ->setBirthdate(Cleaner::date($migMember->getBirthdate()))
         ->setEmail(Cleaner::email($migMember->getEmail()))
         ->setCreated(Cleaner::date($migMember->getCreated()))
-        ->setAdmissionType($migMember->getAdmissionType())
+        ->setAdmissionType(Cleaner::admission($migMember->getAdmissionType()))
     ;
 
     $em->persist($member);
