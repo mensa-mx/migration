@@ -85,10 +85,8 @@ foreach ($migMemberships as $migMembership) {
     $end     = Cleaner::date($migMembership->getEnd());
     $created = \DateTime::createFromFormat('Y-m-d H:i:s', $migMembership->getCreated());
 
-    $membershipDays = $end->diff($start)->days;
-
-    if ($membershipDays <= 1 || $end < $start) {
-        // ¿Membresías de un día?, ¿que finalizan antes de comenzar? ... WTF!
+    if ($end->diff($start)->days <= 1 || $end < $start) {
+        // ¿Membresías de un día?, ¿que finalizan antes de comenzar? ... WTF!!
         echo '[INFO] Membresía no válida para ID ' . $member->getId() . ': '
             .  $start->format('d/m/Y') . ' - '
             .  $end->format('d/m/Y') . PHP_EOL;
