@@ -15,14 +15,21 @@ $metaMember = $em->getClassMetaData('Mensa\Clean\Member');
 
 $metaMember->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
 
+// Lista de registros a ignorar
+$noValidMembers = $params['notValidMembers'];
+
 
 //-- Member --//
 $migMembers = $em->getRepository('\Mensa\Migration\Member')->findAll();
 
 echo 'Miembros por procesar: ' . count($migMembers) . PHP_EOL;
 foreach ($migMembers as $migMember) {
-
     /** @var Migration\Member $migMember */
+    if (in_array($migMember->getId(), $noValidMembers)) {
+        echo '[WARN] Ignorando membresía con ID ' . $migMember->getId() . PHP_EOL;
+        continue;
+    }
+
     list($firstName, $lastName) = Cleaner::names($migMember->getFirstName(), $migMember->getLastName());
 
     //$gender = ($migMember->getGender() !== 'FEMENINO')
@@ -42,17 +49,9 @@ foreach ($migMembers as $migMember) {
         ->setAdmissionType(Cleaner::admission($migMember->getAdmissionType()))
     ;
 
-    $em->persist($member);
-}
 
-
-//-- Address --//
-$migAddresses = $em->getRepository('\Mensa\Migration\Address')->matching(
-    Criteria::create()->orderBy(['id' => Criteria::ASC])
-)->getIterator();
-
-echo 'Direcciones por procesar: ' . count($migAddresses) . PHP_EOL;
-foreach ($migAddresses as $migAddress) {
+    //-- Address --//
+    $migAddress = $migMember->getAddress();
     $address = (new Clean\Address())
         /** @var Migration\Address $migAddress */
         ->setAddressLine1(Cleaner::text($migAddress->getAddressLine1()))
@@ -61,12 +60,11 @@ foreach ($migAddresses as $migAddress) {
         ->setColony(Cleaner::text($migAddress->getColony()))
         ->setState(Cleaner::state($migAddress->getState()))
         ->setPostalCode($migAddress->getPostalCode())
+        ->setMember($member)
     ;
 
-    $member = $em->find('Mensa\Clean\Member', $migAddress->getMember()->getId());
-
-    $address->setMember($member);
     $member->setAddress($address);
+
     $em->persist($address);
     $em->persist($member);
 }

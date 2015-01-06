@@ -15,3 +15,5 @@ old_database:
     password: ~
 
 provisional_file: ~
+
+notValidMembers: []
