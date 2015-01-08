@@ -1,0 +1,76 @@
+#!/usr/bin/env php
+<?php
+/**
+ * @author Alberto Maturano <alberto@maturano.mx>
+ */
+
+require 'cli-config.php';
+
+
+$clientAddress = $params['gdrive']['client_address'];
+$keyFile       = $params['gdrive']['private_key'];
+$userAddress   = $params['gdrive']['user_address'];
+$storageFolder = $params['gdrive']['storage_folder'];
+
+
+$gCredentials = new \Google_Auth_AssertionCredentials(
+    $clientAddress,
+    ['https://www.googleapis.com/auth/drive'],
+    file_get_contents($keyFile),
+    'notasecret',
+    'http://oauth.net/grant_type/jwt/1.0/bearer',
+    $userAddress
+);
+
+$gClient = new \Google_Client();
+$gClient->setAssertionCredentials($gCredentials);
+
+if ($gClient->getAuth()->isAccessTokenExpired()) {
+    $gClient->getAuth()->refreshTokenWithAssertion($gCredentials);
+}
+
+$gDriveService = new \Google_Service_Drive($gClient);
+
+// Folder en GoogleDrive donde se copiarán las imágenes
+$gFolder = new \Google_Service_Drive_ParentReference();
+$gFolder->setId($storageFolder);
+
+
+$results = array_map('str_getcsv', file($params['provisional_file']));
+
+$line = 0;
+foreach ($results as $row) {
+    $line++;
+    if ($line === 1) { continue; } // Header...
+
+    if (empty($row[2])) {
+        echo '[ERROR] Falta ID para fila: ' . $line . PHP_EOL;
+        continue;
+    }
+
+    if ( ! empty($row[7]) // Columna con dato de la url de la fotografía
+      && false !== ($url = parse_url($row[7]))
+      && ! empty($url['host'])
+    ) {
+
+        if ('drive.google.com' === $url['host']) {
+            $idFile = explode('/', $url['path'])[3];
+
+            $origFile = $gDriveService->files->get($idFile);
+
+            $newFile = new \Google_Service_Drive_DriveFile();
+            $newFile->setParents([$gFolder]);
+            $newFile->setTitle($origFile->getMd5Checksum() . '.' . $origFile->getFileExtension());
+
+            try {
+                $gDriveService->files->copy($idFile, $newFile);
+
+            } catch (\Exception $e) {
+                echo '[ERROR] ' . $e->getMessage() . PHP_EOL;
+            }
+
+        } else {
+            /** @TODO Implementar... */
+        }
+    }
+}

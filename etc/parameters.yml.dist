@@ -17,3 +17,9 @@ old_database:
 provisional_file: ~
 
 notValidMembers: []
+
+gdrive:
+    client_address: ~
+    private_key: ~
+    user_address: ~
+    storage_folder: ~

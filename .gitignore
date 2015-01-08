@@ -1,4 +1,4 @@
-.idea/*
+.idea/
 
 
 bin/*
@@ -8,4 +8,6 @@ vendor/*
 !bin/merge
 !bin/migrate
 !bin/cleaner
+!bin/getfiles
 etc/parameters.yml
+*.p12
