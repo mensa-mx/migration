@@ -49,6 +49,10 @@ foreach ($results as $row) {
         continue;
     }
 
+    if (empty($row[18]) && empty($member->getGender())) {
+        $row[18] = Cleaner::gender($row[3]);
+    }
+
     $member->setFromArray([
         'firstName'     => $row[3],
         'lastName'      => $row[4],
