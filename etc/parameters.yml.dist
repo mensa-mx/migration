@@ -14,6 +14,8 @@ old_database:
     user: ~
     password: ~
 
+old_system_path: ~
+
 provisional_file: ~
 
 notValidMembers: []

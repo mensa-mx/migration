@@ -11,6 +11,7 @@ $clientAddress = $params['gdrive']['client_address'];
 $keyFile       = $params['gdrive']['private_key'];
 $userAddress   = $params['gdrive']['user_address'];
 $storageFolder = $params['gdrive']['storage_folder'];
+$oldSystemPath = $params['old_system_path'];
 
 
 $gCredentials = new \Google_Auth_AssertionCredentials(
@@ -35,6 +36,9 @@ $gDriveService = new \Google_Service_Drive($gClient);
 $gFolder = new \Google_Service_Drive_ParentReference();
 $gFolder->setId($storageFolder);
 
+// Información de archivos locales
+$finfo = new finfo(FILEINFO_MIME_TYPE);
+
 
 $results = array_map('str_getcsv', file($params['provisional_file']));
 
@@ -53,13 +57,47 @@ foreach ($results as $row) {
       && ! empty($url['host'])
     ) {
 
-        if ('drive.google.com' === $url['host']) {
+        $newFile = new \Google_Service_Drive_DriveFile();
+        $newFile->setParents([$gFolder]);
+
+        if ('69.73.169.50' === $url['host']) {
+            $file = $oldSystemPath
+                  . str_replace(
+                        ['../', 'thumbnails/'],
+                        '',
+                        base64_decode(
+                            pathinfo($url['path'], PATHINFO_BASENAME)
+                        ) // O_O
+                    );
+
+            if (file_exists($file)) {
+                $content   = file_get_contents($file);
+                $mimeType  = $finfo->buffer($content);
+                $extension = pathinfo($file, PATHINFO_EXTENSION);
+
+                $newFile->setTitle(md5($content) . '.' . $extension);
+                $newFile->setMimeType($mimeType);
+
+                try {
+                    $gDriveService->files->insert($newFile, [
+                        'uploadType' => 'media',
+                        'data'       => $content,
+                        'mimeType'   => $mimeType,
+                    ]);
+
+                } catch (\Exception $e) {
+                    echo '[ERROR] ' . $e->getMessage() . PHP_EOL;
+                }
+
+            } else {
+                echo '[WARNING] Archivo no existe: ' . $file . PHP_EOL;
+            }
+
+        } else if ('drive.google.com' === $url['host']) {
             $idFile = explode('/', $url['path'])[3];
 
             $origFile = $gDriveService->files->get($idFile);
 
-            $newFile = new \Google_Service_Drive_DriveFile();
-            $newFile->setParents([$gFolder]);
             $newFile->setTitle($origFile->getMd5Checksum() . '.' . $origFile->getFileExtension());
 
             try {
