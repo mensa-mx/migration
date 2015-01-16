@@ -8,6 +8,7 @@
         "php": ">=5.4",
         "doctrine/orm": "~2.4",
         "symfony/yaml": "~2.6",
+        "symfony/finder": "~2.6",
         "google/apiclient": "~1.1"
     },
     "require-dev": {

@@ -61,7 +61,13 @@ class Member
     private $email;
 
     /**
+     * @var string
      *
+     * @Column(name="picture", type="string", length=37, nullable=true)
+     */
+    private $picture;
+
+    /**
      * @var string
      *
      * @Column(name="admission_type", type="string", length=50)
@@ -238,6 +244,29 @@ class Member
     public function getEmail()
     {
         return $this->email;
+    }
+
+    /**
+     * Set picture
+     *
+     * @param string $picture
+     * @return Member
+     */
+    public function setPicture($picture)
+    {
+        $this->picture = $picture;
+
+        return $this;
+    }
+
+    /**
+     * Get picture
+     *
+     * @return string
+     */
+    public function getPicture()
+    {
+        return $this->picture;
     }
 
     /**
