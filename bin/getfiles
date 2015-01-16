@@ -7,32 +7,28 @@
 require 'cli-config.php';
 
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Filesystem\Filesystem;
 
 
-// Valores pasados por configuración
+// Busqueda en el filesystem del viejo sistema
+$finder = (new Finder())
+    ->files()
+    ->in($params['old_system_path'])
+;
+
+// Directorio donde se copiarán las imágenes
+$storage = $params['storage'];
+
+$fs = new Filesystem();
+if ( ! $fs->exists($storage)) {
+    $fs->mkdir($storage);
+}
+
+// Gestión de Google Drive
 $clientAddress = $params['gdrive']['client_address'];
 $keyFile       = $params['gdrive']['private_key'];
 $userAddress   = $params['gdrive']['user_address'];
-$storageFolder = $params['gdrive']['storage_folder'];
-$oldSystemPath = $params['old_system_path'];
 
-
-// Determinar el mimetype de un archivo por su contenido
-$finfo = new finfo(FILEINFO_MIME_TYPE);
-
-// Buscar archivos del viejo sistema en el filesystem local
-$finder = (new Finder())
-    ->files()
-    ->in($oldSystemPath)
-    ->path('public_html/DataBase/FOTOGRAFIAS/')
-    ->path('mensa/documents/pictures/')
-;
-
-// Folder en GoogleDrive donde se copiarán las imágenes
-$gFolder = new \Google_Service_Drive_ParentReference();
-$gFolder->setId($storageFolder);
-
-// Gestión de Google Drive
 $gCredentials = new \Google_Auth_AssertionCredentials(
     $clientAddress,
     ['https://www.googleapis.com/auth/drive'],
@@ -52,9 +48,35 @@ if ($gClient->getAuth()->isAccessTokenExpired()) {
 $gDriveService = new \Google_Service_Drive($gClient);
 
 
+// 1ro. Búsqueda local para todos los miembros por nombre del archivo
+foreach ($em->getRepository('\Mensa\Clean\Member')->findAll() as $member) {
+
+    $oldSystem = clone $finder;
+    $oldSystem
+        ->path('public_html/DataBase/FOTOGRAFIAS/')->name($member->getId() . '*')
+        ->path('mensa/documents/pictures/')->name('/' . $member->getFirstName() . ' ' . $member->getLastName() . '/i')
+    ;
+
+    foreach ($oldSystem as $file) {
+        /** @var Symfony\Component\Finder\SplFileInfo $file */
+        $fileName = md5($file->getContents()) . '.' . $file->getExtension();
+        $pathName = $storage . $fileName;
+
+        echo '[INFO] Imagen para ' . $member->getId() . ' via Finder: ' . $fileName . PHP_EOL;
+
+        if ($fs->exists($pathName)) {
+            continue;
+        }
+
+        $fs->rename($file->getPathname(), $pathName);
+
+        $member->setPicture($fileName);
+    }
+}
+
+
 $results = array_map('str_getcsv', file($params['provisional_file']));
 
-$savedFiles = [];
 $line = 0;
 foreach ($results as $row) {
     $line++;
@@ -68,48 +90,13 @@ foreach ($results as $row) {
     /** @var Mensa\Clean\Member $member */
     $member = $em->find('Mensa\Clean\Member', $row[2]);
 
-
-    // 1ro. Búsqueda local por nombre del archivo
-    $findFs = clone $finder;
-    foreach ($findFs->name($row[2] . '*') as $file) {
-        /** @var Symfony\Component\Finder\SplFileInfo $file */
-        $fileName = md5($file->getContents()) . '.' . $file->getExtension();
-        $mimeType = $finfo->buffer($file->getContents());
-
-        if (in_array($fileName, $savedFiles)) {
-            // Procesado previamente...
-            continue;
-        }
-
-        $newFile = new \Google_Service_Drive_DriveFile();
-        $newFile->setParents([$gFolder]);
-        $newFile->setTitle($fileName);
-        $newFile->setMimeType($mimeType);
-
-        try {
-            $gDriveService->files->insert($newFile, [
-                'uploadType' => 'media',
-                'data'       => $file->getContents(),
-                'mimeType'   => $mimeType,
-            ]);
-
-            $member->setPicture($fileName);
-            echo '[INFO] Imagen para ' . $row[2] . ' via Finder: ' . $fileName . PHP_EOL;
-            $savedFiles[] = $fileName;
-
-        } catch (\Exception $e) {
-            echo '[ERROR] ' . $e->getMessage() . PHP_EOL;
-        }
-    }
-
-
     if ( ! empty($row[7]) // Columna con dato de la url de la fotografía
       && false !== ($url = parse_url($row[7]))
       && ! empty($url['host'])
     ) {
         // 2do. Ruta explícita decifrada por URL
         if ('69.73.169.50' === $url['host']) {
-            $file = $oldSystemPath
+            $file = $params['old_system_path']
                   . str_replace(
                         ['../', 'thumbnails/'],
                         '',
@@ -118,62 +105,41 @@ foreach ($results as $row) {
                         ) // O_O
                     );
 
-            if ( ! file_exists($file)) { continue; }
-
-            $content  = file_get_contents($file);
-            $fileName = md5($content) . '.' . pathinfo($file, PATHINFO_EXTENSION);
-            $mimeType = $finfo->buffer($content);
-
-            if (in_array($fileName, $savedFiles)) {
-                // Procesado previamente...
+            if ( ! $fs->exists($file)) {
                 continue;
             }
 
-            $newFile = new \Google_Service_Drive_DriveFile();
-            $newFile->setParents([$gFolder]);
-            $newFile->setTitle($fileName);
-            $newFile->setMimeType($mimeType);
+            $fileName = md5(file_get_contents($file)) . '.' . pathinfo($file, PATHINFO_EXTENSION);
+            $pathName = $storage . $fileName;
 
-            try {
-                $gDriveService->files->insert($newFile, [
-                    'uploadType' => 'media',
-                    'data'       => $content,
-                    'mimeType'   => $mimeType,
-                ]);
-
-                $member->setPicture($fileName);
-                echo '[INFO] Imagen para ' . $row[2] . ' via System: ' . $fileName . PHP_EOL;
-                $savedFiles[] = $fileName;
-
-            } catch (\Exception $e) {
-                echo '[ERROR] ' . $e->getMessage() . PHP_EOL;
+            if ($fs->exists($pathName)) {
+                continue;
             }
+
+            $fs->rename($file, $pathName);
+
+            $member->setPicture($fileName);
+            echo '[INFO] Imagen para ' . $row[2] . ' via System: ' . $fileName . PHP_EOL;
 
         } else if ('drive.google.com' === $url['host']) {
             // 3ro. Copiar de Google Drive
-            $idFile   = explode('/', $url['path'])[3];
-            $origFile = $gDriveService->files->get($idFile);
-            $fileName = $origFile->getMd5Checksum() . '.' . $origFile->getFileExtension();
+            $file = $gDriveService->files->get(
+                explode('/', $url['path'])[3]
+            );
 
-            if (in_array($fileName, $savedFiles)) {
-                // Procesado previamente...
+            $fileName = $file->getMd5Checksum() . '.' . $file->getFileExtension();
+            $pathName = $storage . $fileName;
+
+            if ($fs->exists($pathName)) {
                 continue;
             }
 
-            $newFile = new \Google_Service_Drive_DriveFile();
-            $newFile->setParents([$gFolder]);
-            $newFile->setTitle($fileName);
+            $respose = $gClient->getAuth()->authenticatedRequest(new \Google_Http_Request($file->getDownloadUrl()));
 
-            try {
-                $gDriveService->files->copy($idFile, $newFile);
+            $fs->dumpFile($pathName, $respose->getResponseBody());
 
-                $member->setPicture($fileName);
-                echo '[INFO] Imagen para ' . $row[2] . ' via Gdrive: ' . $fileName . PHP_EOL;
-                $savedFiles[] = $fileName;
-
-            } catch (\Exception $e) {
-                echo '[ERROR] ' . $e->getMessage() . PHP_EOL;
-            }
+            $member->setPicture($fileName);
+            echo '[INFO] Imagen para ' . $row[2] . ' via Gdrive: ' . $fileName . PHP_EOL;
         }
     }
 }

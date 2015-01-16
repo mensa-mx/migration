@@ -6,6 +6,8 @@ database:
     user: ~
     password: ~
 
+storage: ~
+
 old_database:
     driver: mysql
     host: localhost
@@ -24,4 +26,3 @@ gdrive:
     client_address: ~
     private_key: ~
     user_address: ~
-    storage_folder: ~
