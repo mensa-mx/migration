@@ -68,7 +68,7 @@ foreach ($em->getRepository('\Mensa\Clean\Member')->findAll() as $member) {
             continue;
         }
 
-        $fs->rename($file->getPathname(), $pathName);
+        $fs->copy($file->getPathname(), $pathName);
 
         $member->setPicture($fileName);
     }
@@ -116,7 +116,7 @@ foreach ($results as $row) {
                 continue;
             }
 
-            $fs->rename($file, $pathName);
+            $fs->copy($file, $pathName);
 
             $member->setPicture($fileName);
             echo '[INFO] Imagen para ' . $row[2] . ' via System: ' . $fileName . PHP_EOL;
