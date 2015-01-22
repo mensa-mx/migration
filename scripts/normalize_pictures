@@ -1,0 +1,83 @@
+#!/bin/bash
+
+ROOT_DIR=`cd $( dirname ${0} )/.. && pwd`
+
+file_config="${ROOT_DIR}/etc/parameters.yml"
+
+# Cliente ejecutable de PostgreSQL
+_PGSQL="psql -XqtA --set ON_ERROR_STOP=on "
+
+# Pone a disposición parámetros de configuración como variables
+function parse_yaml {
+    # Modificado de: http://stackoverflow.com/a/21189044/156809
+    local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+
+    eval $(\
+        sed -ne "s|^\($s\):|\1|" \
+            -e  "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+            -e  "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p" $1 |
+
+        awk -F$fs '{
+            indent = length($1)/4;
+            vname[indent] = $2;
+            for (i in vname) { if (i > indent) { delete vname[i] } }
+            if (length($3) > 0) {
+                vn=""; for (i=0; i<indent; i++) { vn=(vn)(vname[i])("_") }
+                printf("%s%s=\"%s\"\n", vn, $2, $3);
+            }
+        }' \
+    )
+}
+parse_yaml ${file_config}
+
+# Variables requeridas para autenticación de `psql`
+export PGHOST=${database_host}
+export PGPORT=${database_port}
+export PGDATABASE=${database_dbname}
+export PGUSER=${database_user}
+export PGPASSWORD=${database_password}
+
+echo "Ingresando a ${storage}"
+echo ""
+cd ${storage}
+
+${_PGSQL} -F' ' -c "SELECT id, picture FROM members WHERE picture IS NOT NULL" |
+while read id_member picture
+  do
+    file=${picture}
+    tmp_file="${file%%.*}.jpg"
+
+    if [ ! -e ${tmp_file} ]
+      then
+        if [ "image/jpeg" != `file -i ${file} | awk '{ print $2 }' | sed s/\;$//` ]
+          then
+            # A JPEG
+            echo "Conviertiendo ${file} a JPEG"
+            convert ${file} ${tmp_file}
+        else
+            echo "Renombrando ${file} a ${tmp_file}"
+            mv ${file} ${tmp_file}
+        fi
+    fi
+
+    file=${tmp_file}
+    file_name="`md5sum ${file} | awk '{ print $1 }'`"
+
+    if [ "${file_name}" != "${file%%.*}" ]
+      then
+        new_file="${file_name}.jpg"
+
+        echo "Nueva imagen para ${id_member}: ${new_file}"
+        mv ${file} ${new_file}
+        git checkout -- ${picture} # Nada se borra...
+        ${_PGSQL} -c "UPDATE members SET picture = '${new_file}' WHERE id = ${id_member}"
+
+        pgsql_exit_status=$?
+
+        if [ ${pgsql_exit_status} != 0 ]
+          then
+            echo "[ERROR] Error actualizando registro con id ${id_member}"
+            exit ${pgsql_exit_status}
+        fi
+    fi
+done
