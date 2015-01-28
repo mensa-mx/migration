@@ -62,6 +62,7 @@ foreach ($em->getRepository('\Mensa\Clean\Member')->findAll() as $member) {
         $fileName = md5($file->getContents()) . '.' . $file->getExtension();
         $pathName = $storage . $fileName;
 
+        $member->setPicture($fileName);
         echo '[INFO] Imagen para ' . $member->getId() . ' via Finder: ' . $fileName . PHP_EOL;
 
         if ($fs->exists($pathName)) {
@@ -69,8 +70,6 @@ foreach ($em->getRepository('\Mensa\Clean\Member')->findAll() as $member) {
         }
 
         $fs->copy($file->getPathname(), $pathName);
-
-        $member->setPicture($fileName);
     }
 }
 
