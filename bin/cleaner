@@ -138,7 +138,7 @@ foreach ($migMemberships as $migMembership) {
         /** @var Migration\Membership $migMembership */
         ->setStart($start)
         ->setEnd($end)
-        ->setDelivery($migMembership->getDelivery())
+        ->setDelivery(Cleaner::delivery($migMembership->getDelivery()))
         ->setCreated($created)
     ;
 

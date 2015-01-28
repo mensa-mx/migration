@@ -145,9 +145,45 @@ class Cleaner
         return new \DateTime($date);
     }
 
-    static public function deliver($input)
+    /**
+     * Normaliza estatus de entrega de credencial
+     *
+     * @param  string $input
+     * @return string
+     */
+    static public function delivery($input)
     {
-        return explode(' ', $input)[0];
+        $input = trim($input);
+
+        switch (strtolower($input)) {
+            case 'entregada':
+                $status = 'CARD_DELIVERED';
+                break;
+
+            case 'enviada':
+            case 'enviada / cambió de domicilio':
+                $status = 'CARD_SHIPPED';
+                break;
+
+            case 'impresa':
+                $status = 'PRINTED';
+                break;
+
+            case 'to print':
+            case 'pendiente':
+                $status = 'TO_PRINT';
+                break;
+
+            case '¿?':
+            case '':
+                $status = null;
+                break;
+
+            default:
+                $status = $input;
+        }
+
+        return $status;
     }
 
     /**

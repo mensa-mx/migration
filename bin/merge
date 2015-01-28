@@ -120,7 +120,7 @@ foreach ($results as $row) {
                 ->setFromArray([
                     'start'     => $start,
                     'end'       => $row[5],
-                    'delivery'  => Cleaner::deliver($row[0]),
+                    'delivery'  => $row[0],
                     'created'   => date('Y-m-d H:i:s'),
                 ])
             ;
@@ -144,6 +144,6 @@ try {
 
 
 echo 'Registros nuevos: ' . $regNew . PHP_EOL
-    . 'Registros modificados: ' . $regUps . PHP_EOL
-    . 'Nuevas membersías: ' . $mmbsNew . PHP_EOL
-    ;
+   . 'Registros modificados: ' . $regUps . PHP_EOL
+   . 'Nuevas membersías: ' . $mmbsNew . PHP_EOL
+;

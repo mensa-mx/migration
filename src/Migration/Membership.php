@@ -42,7 +42,7 @@ class Membership
     /**
      * @var string
      *
-     * @Column(name="delivery", type="string", length=20, nullable=true)
+     * @Column(name="delivery", type="string", length=50, nullable=true)
      */
     private $delivery;
 
