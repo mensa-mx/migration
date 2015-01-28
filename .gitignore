@@ -10,5 +10,6 @@ vendor/*
 !bin/migrate
 !bin/cleaner
 !bin/getfiles
+!bin/credentials
 etc/parameters.yml
 *.p12
