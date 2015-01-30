@@ -45,32 +45,43 @@ ${_PGSQL} -F' ' -c "SELECT id, picture FROM members WHERE picture IS NOT NULL" |
 while read id_member picture
   do
     file=${picture}
-    tmp_file="${file%%.*}.jpg"
 
-    if [ ! -e ${tmp_file} ]
+    # Cambio de extensión por posible edición manual
+    if [ -f "${file%%.*}.jpg" ]
       then
-        if [ "image/jpeg" != `file -i ${file} | awk '{ print $2 }' | sed s/\;$//` ]
-          then
-            # A JPEG
-            echo "Conviertiendo ${file} a JPEG"
-            convert ${file} ${tmp_file}
-        else
-            echo "Renombrando ${file} a ${tmp_file}"
-            mv ${file} ${tmp_file}
-        fi
+        file="${file%%.*}.jpg"
     fi
 
-    file=${tmp_file}
-    file_name="`md5sum ${file} | awk '{ print $1 }'`"
+    # Ajuste a proporción 6:5 (1.2)
+    dimensions=(`identify -format "%w %h" ${file}`)
+    hbound=$(echo "${dimensions[0]} * 1.2" | bc)
+    hbound=${hbound%%.*}
 
-    if [ "${file_name}" != "${file%%.*}" ]
+    if (( ${dimensions[1]} > ${hbound} ))
       then
-        new_file="${file_name}.jpg"
+        width=${dimensions[0]}
+        height=${hbound}
+        xoffset=0
+        yoffset=$(( (${dimensions[1]} - ${height}) / 2 ))
 
-        echo "Nueva imagen para ${id_member}: ${new_file}"
-        mv ${file} ${new_file}
+    else
+        # Cortado horizontal
+        width=$(echo "${dimensions[1]} / 1.2" | bc)
+        height=${dimensions[1]}
+        xoffset=$(( (${dimensions[0]} - ${width}) / 2 ))
+        yoffset=0
+    fi
+
+    convert ${file} -crop "${width}x${height}+${xoffset}+${yoffset}" ${file}
+
+    file_name="`md5sum ${file} | awk '{ print $1 }'`.jpg"
+
+    if [ "${file_name}" != "${file}" ]
+      then
+        mv ${file} ${file_name}
         git checkout -- ${picture} # Nada se borra...
-        ${_PGSQL} -c "UPDATE members SET picture = '${new_file}' WHERE id = ${id_member}"
+
+        ${_PGSQL} -c "UPDATE members SET picture = '${file_name}' WHERE id = ${id_member}"
 
         pgsql_exit_status=$?
 
@@ -79,5 +90,7 @@ while read id_member picture
             echo "[ERROR] Error actualizando registro con id ${id_member}"
             exit ${pgsql_exit_status}
         fi
+
+        printf "%d | %36s | %4s x %4s | %36s | %4s x %4s |\n" ${id_member} $file ${dimensions[0]} ${dimensions[1]} ${file_name} ${width} ${height}
     fi
 done
